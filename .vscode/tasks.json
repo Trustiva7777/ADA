@@ -124,8 +124,68 @@
                 "${workspaceFolder}/SampleApp/BackEnd/BackEnd.csproj"
             ],
             "problemMatcher": "$msCompile"
-        }
-        ,
+        },
+        {
+            "label": "🚀 RWA: Build all chains (Docker)",
+            "type": "shell",
+            "command": "docker compose -f ${workspaceFolder}/docker-compose.all-chains.yml build",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false
+            }
+        },
+        {
+            "label": "🚀 RWA: Up all chains (Docker)",
+            "type": "shell",
+            "command": "docker compose -f ${workspaceFolder}/docker-compose.all-chains.yml up --build -d",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false
+            }
+        },
+        {
+            "label": "🚀 RWA: Down all chains (Docker)",
+            "type": "shell",
+            "command": "docker compose -f ${workspaceFolder}/docker-compose.all-chains.yml down",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false
+            }
+        },
+        {
+            "label": "🚀 RWA: Logs all chains (Docker)",
+            "type": "shell",
+            "command": "docker compose -f ${workspaceFolder}/docker-compose.all-chains.yml logs -f",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false
+            }
+        },
+        {
+            "label": "🌙 Midnight: Build",
+            "type": "shell",
+            "command": "docker build -t midnight-suite:latest ${workspaceFolder}/apps/midnight-suite",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false
+            }
+        },
+        {
+            "label": "🔗 Cardano: Build MintTool",
+            "type": "shell",
+            "command": "dotnet build ${workspaceFolder}/rwa-suite/chains/cardano/tools/MintTool/MintTool.csproj",
+            "problemMatcher": "$msCompile"
+        },
         {
             "label": "Brief: open investor one-pager",
             "type": "shell",
@@ -551,3 +611,7 @@
         }
     ]
 }
+
+// Multi-Chain Tasks (append new tasks here)
+// ==========================================
+// These tasks orchestrate building and running all RWA chains

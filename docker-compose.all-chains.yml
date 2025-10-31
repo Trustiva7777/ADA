@@ -1,0 +1,184 @@
+version: "3.9"
+
+# Unified Docker Compose for all RWA chains
+# This orchestrates Cardano, Midnight, and other blockchain services
+# Use: docker compose -f docker-compose.all-chains.yml up --build -d
+
+services:
+  # ============================================
+  # Cardano Chain Infrastructure
+  # ============================================
+  cardano-node:
+    image: inputoutput/cardano-node:8.11.0
+    container_name: cardano-node
+    user: "1000:1000"
+    environment:
+      - NETWORK=preview
+    ports:
+      - "3001:3001"
+    volumes:
+      - cardano-node-db:/data
+      - cardano-node-ipc:/ipc
+    networks:
+      - rwa-network
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "sh", "-c", "ls /ipc/node.socket"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '1.0'
+
+  ogmios:
+    image: cardanosolutions/ogmios:v6.7.0
+    container_name: ogmios
+    user: "1000:1000"
+    depends_on:
+      cardano-node:
+        condition: service_healthy
+    environment:
+      OGMIOS_HOST: 0.0.0.0
+    ports:
+      - "1337:1337"
+    volumes:
+      - cardano-node-ipc:/ipc
+    networks:
+      - rwa-network
+    command:
+      - "--host"
+      - "0.0.0.0"
+      - "--node-socket"
+      - "/ipc/node.socket"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:1337/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kupo:
+    image: cardanosolutions/kupo:v2.11.0
+    container_name: kupo
+    user: "1000:1000"
+    depends_on:
+      ogmios:
+        condition: service_healthy
+    environment:
+      KUPO_HOST: 0.0.0.0
+      KUPO_PORT: 1442
+    ports:
+      - "1442:1442"
+    volumes:
+      - kupo-db:/app/db
+    networks:
+      - rwa-network
+    command:
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "1442"
+      - "--ogmios-host"
+      - "ogmios"
+      - "--ogmios-port"
+      - "1337"
+      - "--workdir"
+      - "/app/db"
+      - "--prune-utxo"
+      - "--since"
+      - "origin"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:1442/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # .NET RWA Applications (Backend & Frontend)
+  # ============================================
+  backend:
+    build:
+      context: .
+      dockerfile: SampleApp/BackEnd/Dockerfile
+    container_name: backend
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - CARDANO_NETWORK=preview
+      - OGMIOS_URL=ws://ogmios:1337
+      - KUPO_URL=http://kupo:1442
+    networks:
+      - rwa-network
+    depends_on:
+      - ogmios
+      - kupo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: .
+      dockerfile: SampleApp/FrontEnd/Dockerfile
+    container_name: frontend
+    ports:
+      - "8081:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8081
+      - WEATHER_URL=http://backend:8080
+    networks:
+      - rwa-network
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Midnight Chain (Node.js-based)
+  # ============================================
+  midnight-suite:
+    build:
+      context: ./apps/midnight-suite
+      dockerfile: Dockerfile
+    container_name: midnight-suite
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=info
+    volumes:
+      - midnight-data:/app/data
+    networks:
+      - rwa-network
+    command: npm run night:dust -- --tps 0.5 --duration-days 90 --safety 1.5
+
+networks:
+  rwa-network:
+    driver: bridge
+
+volumes:
+  cardano-node-db:
+    driver: local
+  cardano-node-ipc:
+    driver: local
+  kupo-db:
+    driver: local
+  midnight-data:
+    driver: local
