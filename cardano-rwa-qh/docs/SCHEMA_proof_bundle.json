@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QH Proof Bundle",
+  "type": "object",
+  "required": ["schema","series","asset","ops","reports"],
+  "properties": {
+    "schema": { "type": "string" },
+    "series": { "type": "string" },
+    "generated_at": { "type": "string" },
+    "asset": {
+      "type": "object",
+      "required": ["name","jurisdiction","issuer","rights"],
+      "properties": {
+        "name": { "type": "string" },
+        "jurisdiction": { "type": "string" },
+        "issuer": { "type": "string" },
+        "rights": { "type": "string" },
+        "concession_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "location": { "type": "object" },
+    "ops": {
+      "type": "object",
+      "required": ["throughput_tpm","payouts"],
+      "properties": {
+        "throughput_tpm": { "type": "number" },
+        "phase_start_target": { "type": "string" },
+        "payouts": {
+          "type": "object",
+          "required": ["cadence","currency"],
+          "properties": {
+            "cadence": { "type": "string" },
+            "currency": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "reports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title","hash_sha256","uri"],
+        "properties": {
+          "title": { "type": "string" },
+          "hash_sha256": { "type": "string" },
+          "uri": { "type": "string" }
+        }
+      }
+    },
+    "attachments": { "type": "array" }
+  }
+}

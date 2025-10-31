@@ -14,6 +14,58 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "label": "Signer: export bundle for batch 001",
+            "type": "shell",
+            "command": "bash -lc 'set -e; mkdir -p signer_bundle/scripts; cp cardano-rwa-qh/out/tx_batches/tx_batch_001.json signer_bundle/; cp cardano-rwa-qh/out/tx_batches/tx_batch_001.inputs.template.json signer_bundle/; cp cardano-rwa-qh/docs/token/attestation.*.json signer_bundle/ 2>/dev/null || true; printf \"Change address (fill on signer):\\n<YOUR_TREASURY_RETURN_ADDRESS>\\n\" > signer_bundle/CHANGE_ADDR.txt; printf \"Network flag (edit):\\n--testnet-magic 1\\n\" > signer_bundle/NETWORK_FLAG.txt; printf \"Use scripts/signer/build_sign_submit.sh on signer host.\\n\" > signer_bundle/README.txt; cp scripts/signer/build_sign_submit.sh signer_bundle/scripts/ 2>/dev/null || true; cp scripts/signer/build_sign_submit.ps1 signer_bundle/scripts/ 2>/dev/null || true; tar -czf cardano-rwa-qh/out/tx_batches/tx_batch_001_signer_bundle.tgz signer_bundle; rm -rf signer_bundle'",
+            "problemMatcher": []
+        },
+        {
+            "label": "Signer: sanity check allowlist vs batch plan",
+            "type": "shell",
+            "command": "bash -lc 'scripts/signer/sanity_check_allowlist.sh --plan cardano-rwa-qh/out/tx_batches/tx_batch_001.json --allowlist ${input:allowlistPath}'",
+            "problemMatcher": []
+        },
+        {
+            "label": "Cardano: Mint — plan (unsigned, .NET)",
+            "type": "shell",
+            "command": "dotnet run --project rwa-suite/chains/cardano/tools/MintTool/MintTool.csproj -- mint-plan --policy-id ${input:mintPolicyId} --asset-name ${input:mintAssetName} --amount ${input:mintAmount} --decimals ${input:mintDecimals} --doc-cid ${input:mintDocCid} --attestation rwa-suite/chains/cardano/docs/token/attestation.${input:network}.json --network ${input:network} --inputs-template rwa-suite/chains/cardano/out/mint/inputs.template.json --change-address ${input:mintChangeAddress} --out-dir rwa-suite/chains/cardano/out/mint",
+            "problemMatcher": []
+        },
+        {
+            "label": "Cardano: Policy — script (sig + optional before)",
+            "type": "shell",
+            "command": "bash -lc 'BS=\"${input:mintPolicyBeforeSlot}\"; EXTRA=\"\"; if [ -n \"$BS\" ]; then EXTRA=\"--before-slot $BS\"; fi; dotnet run --project rwa-suite/chains/cardano/tools/MintTool/MintTool.csproj -- policy-script --key-hash ${input:policyKeyHash} $EXTRA --out rwa-suite/chains/cardano/policy/policy.script.json'",
+            "problemMatcher": []
+        },
+        {
+            "label": "Cardano: Policy — id (from script)",
+            "type": "shell",
+            "command": "dotnet run --project rwa-suite/chains/cardano/tools/MintTool/MintTool.csproj -- policy-id --from rwa-suite/chains/cardano/policy/policy.script.json",
+            "problemMatcher": []
+        },
+        {
+            "label": "Distribute (Node): plan",
+            "type": "shell",
+            "options": { "cwd": "${workspaceFolder}" },
+            "command": "pnpm --dir ${workspaceFolder}/cardano-rwa-qh distribute -- --csv ${workspaceFolder}/cardano-rwa-qh/docs/qh_r1_payouts_template.csv --mode plan",
+            "problemMatcher": []
+        },
+        {
+            "label": "Distribute (Node): run",
+            "type": "shell",
+            "options": { "cwd": "${workspaceFolder}" },
+            "command": "pnpm --dir ${workspaceFolder}/cardano-rwa-qh distribute -- --csv ${workspaceFolder}/cardano-rwa-qh/docs/qh_r1_payouts_template.csv --mode run",
+            "problemMatcher": []
+        },
+        {
+            "label": "Wallet: generate (SeedGen, .NET)",
+            "type": "shell",
+            "options": { "cwd": "${workspaceFolder}" },
+            "command": "dotnet run --project tools/SeedGen -- --out Cardano/Dev/Wallet",
+            "problemMatcher": []
+        },
+
+        {
             "label": "publish frontend",
             "command": "dotnet",
             "type": "process",
@@ -72,6 +124,430 @@
                 "${workspaceFolder}/SampleApp/BackEnd/BackEnd.csproj"
             ],
             "problemMatcher": "$msCompile"
+        }
+        ,
+        {
+            "label": "Brief: open investor one-pager",
+            "type": "shell",
+            "command": "${command:workbench.action.files.openFile}",
+            "args": [
+                "${workspaceFolder}/cardano-rwa-qh/docs/INVESTOR_BRIEF_QH-R1.md"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Proof: validate bundle",
+            "type": "shell",
+            "command": "pnpm validate:proof",
+            "options": {
+                "cwd": "${workspaceFolder}/cardano-rwa-qh"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Policy: plan lock slot (+45d)",
+            "type": "shell",
+            "command": "pnpm slot:deadline",
+            "options": {
+                "cwd": "${workspaceFolder}/cardano-rwa-qh"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Snapshot: holders (record date)",
+            "type": "shell",
+            "command": "pnpm snapshot -- --policy ${input:policy} --asset ${input:assetHex}",
+            "options": {
+                "cwd": "${workspaceFolder}/cardano-rwa-qh"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Midnight: Eligibility (dry)",
+            "type": "shell",
+            "command": "pnpm --dir apps/midnight-suite night:eligibility -- --wallets file:apps/midnight-suite/data/wallets.csv --snapshot 2025-06-11 --threshold 100",
+            "problemMatcher": []
+        },
+        {
+            "label": "Midnight: Generate fresh ADA addr",
+            "type": "shell",
+            "command": "pnpm --dir apps/midnight-suite night:fresh-addr",
+            "problemMatcher": []
+        },
+        {
+            "label": "Midnight: Unlocks calendar",
+            "type": "shell",
+            "command": "pnpm --dir apps/midnight-suite night:unlocks -- --start 2025-10-15 --events 4 --days 360",
+            "problemMatcher": []
+        },
+        {
+            "label": "Midnight: DUST model (plan)",
+            "type": "shell",
+            "command": "pnpm --dir apps/midnight-suite night:dust -- --tps 0.5 --duration-days 90 --safety 1.5",
+            "problemMatcher": []
+        },
+        {
+            "label": "Midnight: Portfolio snapshot",
+            "type": "shell",
+            "command": "pnpm --dir apps/midnight-suite night:portfolio -- --wallets file:apps/midnight-suite/data/wallets.csv",
+            "problemMatcher": []
+        },
+        {
+            "label": "Midnight: Scavenger planner",
+            "type": "shell",
+            "command": "pnpm --dir apps/midnight-suite night:scavenger -- --days 14 --hashrate 50 --unit-hashrate 1 --diff 1.0 --cap 1_000_000 --rng 0.25",
+            "problemMatcher": []
+        }
+        ,
+        {
+            "label": "Proofs: build sha256 manifest",
+            "type": "shell",
+            "command": "pnpm proofs:sha256",
+            "options": {
+                "cwd": "${workspaceFolder}/cardano-rwa-qh"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Attestation: generate issuance attestation",
+            "type": "shell",
+            "command": "pnpm attest:issuance -- --policy ${input:policy} --network ${input:network} --allowlist-sha ${input:allowlistSha}",
+            "options": {
+                "cwd": "${workspaceFolder}/cardano-rwa-qh"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Proofs: build sha256 manifest (.NET)",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/tools/HashAttest/HashAttest.csproj",
+                "--",
+                "manifest",
+                "--dir",
+                "${workspaceFolder}/cardano-rwa-qh/docs",
+                "--out",
+                "${workspaceFolder}/cardano-rwa-qh/docs/sha256-manifest.json",
+                "--ignore",
+                ".git,node_modules,dist,bin,obj"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Attestation: generate issuance attestation (.NET)",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/tools/HashAttest/HashAttest.csproj",
+                "--",
+                "attest",
+                "--policy",
+                "${input:policy}",
+                "--network",
+                "${input:network}",
+                "--manifest",
+                "${workspaceFolder}/cardano-rwa-qh/docs/sha256-manifest.json",
+                "--out",
+                "${workspaceFolder}/cardano-rwa-qh/docs/attestation.json",
+                "--allowlist-sha",
+                "${input:allowlistSha}"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Policy: plan lock slot (.NET)",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/tools/LockSlotPlan/LockSlotPlan.csproj",
+                "--",
+                "plan",
+                "--days",
+                "${input:lockDays}",
+                "--out",
+                "${workspaceFolder}/cardano-rwa-qh/reports/lock_plan.json"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Policy: plan lock slot (.NET with current slot)",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/tools/LockSlotPlan/LockSlotPlan.csproj",
+                "--",
+                "plan",
+                "--days",
+                "${input:lockDays}",
+                "--current-slot",
+                "${input:currentSlot}",
+                "--slot-rate",
+                "1",
+                "--out",
+                "${workspaceFolder}/cardano-rwa-qh/reports/lock_plan.json"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Open: mainnet env sample",
+            "type": "shell",
+            "command": "${command:workbench.action.files.openFile}",
+            "args": [
+                "${workspaceFolder}/cardano-rwa-qh/.env.mainnet.example"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Hash: policy.json (.NET)",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/tools/HashAttest/HashAttest.csproj",
+                "--",
+                "hash",
+                "--file",
+                "${input:policyJsonPath}",
+                "--out",
+                "${workspaceFolder}/cardano-rwa-qh/docs/policy.sha256.json"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Attestation: policy/lock/proofs (.NET)",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/tools/HashAttest/HashAttest.csproj",
+                "--",
+                "attest",
+                "--policy",
+                "${input:policy}",
+                "--network",
+                "${input:network}",
+                "--manifest",
+                "${workspaceFolder}/cardano-rwa-qh/docs/sha256-manifest.json",
+                "--out",
+                "${workspaceFolder}/cardano-rwa-qh/docs/token/attestation.${input:network}.json",
+                "--policy-json",
+                "${input:policyJsonPath}",
+                "--before-slot",
+                "${input:beforeSlot}",
+                "--allowlist-file",
+                "${input:allowlistPath}",
+                "--allowlist-sha",
+                "${input:allowlistSha}"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Policy: plan lock ➜ attestation (auto) (.NET)",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-lc",
+                "set -euo pipefail; CS='${input:currentSlot}'; OPTO=''; if [ -n \"$CS\" ]; then OPTO=\"--current-slot $CS\"; fi; dotnet run --project '${workspaceFolder}/tools/LockSlotPlan/LockSlotPlan.csproj' -- plan --days '${input:lockDays}' $OPTO --slot-rate 1 --out '${workspaceFolder}/cardano-rwa-qh/reports/lock_plan.json'; BEFORE=$(cat '${workspaceFolder}/cardano-rwa-qh/reports/lock_plan.beforeSlot' 2>/dev/null || true); EXTRA=''; if [ -n \"$BEFORE\" ]; then EXTRA=\"--before-slot $BEFORE\"; fi; POLICY_JSON='${input:policyJsonPath}'; JSONARG=''; if [ -f \"$POLICY_JSON\" ]; then JSONARG=\"--policy-json $POLICY_JSON\"; fi; dotnet run --project '${workspaceFolder}/tools/HashAttest/HashAttest.csproj' -- attest --policy '${input:policy}' --network '${input:network}' --manifest '${workspaceFolder}/cardano-rwa-qh/docs/sha256-manifest.json' --out '${workspaceFolder}/cardano-rwa-qh/docs/token/attestation.${input:network}.json' $JSONARG --allowlist-file '${input:allowlistPath}' $EXTRA"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Allowlist: hash snapshot (.NET)",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/tools/HashAttest/HashAttest.csproj",
+                "--",
+                "allowhash",
+                "--file",
+                "${input:allowlistPath}",
+                "--out",
+                "${workspaceFolder}/cardano-rwa-qh/docs/allowlist.sha256.json"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Payouts: plan (.NET)",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/tools/PayoutPlan/PayoutPlan.csproj",
+                "--",
+                "csv",
+                "--file",
+                "${input:payoutCsv}",
+                "--out",
+                "${workspaceFolder}/cardano-rwa-qh/reports/payout_plan.json"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Payouts: ADA ledger (.NET)",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/tools/PayoutPlan/PayoutPlan.csproj",
+                "--",
+                "csv",
+                "--file",
+                "${input:payoutCsv}",
+                "--fx",
+                "${input:fxRate}",
+                "--ada-ledger",
+                "${workspaceFolder}/cardano-rwa-qh/reports/ada_ledger.csv"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Distribute: draft ADA tx batches (.NET)",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/tools/AdaDraft/AdaDraft.csproj",
+                "--",
+                "--ledger",
+                "${input:adaLedgerPath}",
+                "--out",
+                "${workspaceFolder}/cardano-rwa-qh/out/tx_batches",
+                "--policy",
+                "${input:policy}",
+                "--network",
+                "${input:network}",
+                "--max-outputs",
+                "${input:maxOutputs}"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Distribute: open batch summary",
+            "type": "shell",
+            "command": "cat ${workspaceFolder}/cardano-rwa-qh/out/tx_batches/SUMMARY.json || echo 'Run the draft task first.'",
+            "problemMatcher": []
+        },
+        {
+            "label": "Open: MAINNET_READINESS_QH-R1.md",
+            "type": "shell",
+            "command": "${command:workbench.action.files.openFile}",
+            "args": [
+                "${workspaceFolder}/cardano-rwa-qh/docs/MAINNET_READINESS_QH-R1.md"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Open: MAINNET_READINESS_CHECKLIST.md",
+            "type": "shell",
+            "command": "${command:workbench.action.files.openFile}",
+            "args": [
+                "${workspaceFolder}/cardano-rwa-qh/docs/MAINNET_READINESS_CHECKLIST.md"
+            ],
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        { "id": "mintPolicyId", "type": "promptString", "description": "PolicyId (hex)" },
+        { "id": "mintAssetName", "type": "promptString", "description": "Asset name (ASCII)", "default": "QH-R1" },
+        { "id": "mintAmount", "type": "promptString", "description": "Mint quantity (base units)", "default": "1000000" },
+        { "id": "mintDecimals", "type": "promptString", "description": "Decimals for display", "default": "2" },
+        { "id": "mintDocCid", "type": "promptString", "description": "ipfs://CID for docs", "default": "ipfs://YOUR_CID" },
+        { "id": "mintChangeAddress", "type": "promptString", "description": "Change address (signer wallet)" },
+        { "id": "policyKeyHash", "type": "promptString", "description": "Policy key hash (hex, from signer)" },
+        { "id": "mintPolicyBeforeSlot", "type": "promptString", "description": "Optional before slot (leave empty to omit)" },
+        {
+            "id": "policy",
+            "type": "promptString",
+            "description": "Policy ID",
+            "default": ""
+        },
+        {
+            "id": "assetHex",
+            "type": "promptString",
+            "description": "Asset name hex (QH-R1 default)",
+            "default": "51482d5231"
+        },
+        {
+            "id": "network",
+            "type": "promptString",
+            "description": "Network (Preprod|Mainnet)",
+            "default": "Preprod"
+        },
+        {
+            "id": "allowlistSha",
+            "type": "promptString",
+            "description": "SHA-256 of frozen allowlist snapshot (optional)",
+            "default": ""
+        },
+        {
+            "id": "policyJsonPath",
+            "type": "promptString",
+            "description": "Path to policy JSON file",
+            "default": "${workspaceFolder}/cardano-rwa-qh/policy.json"
+        },
+        {
+            "id": "beforeSlot",
+            "type": "promptString",
+            "description": "Policy lock before-slot (optional)",
+            "default": ""
+        },
+        {
+            "id": "allowlistPath",
+            "type": "promptString",
+            "description": "Path to allowlist CSV or JSON",
+            "default": "${workspaceFolder}/cardano-rwa-qh/docs/allowlist.csv"
+        },
+        {
+            "id": "payoutCsv",
+            "type": "promptString",
+            "description": "Path to payouts CSV (wallet_address,tokens_held,pro_rata_share,payout_amount_usd)",
+            "default": "${workspaceFolder}/cardano-rwa-qh/docs/qh_r1_payouts_template.csv"
+        },
+        {
+            "id": "fxRate",
+            "type": "promptString",
+            "description": "USD→ADA exchange rate (e.g., 0.33)",
+            "default": "0.33"
+        },
+        {
+            "id": "lockDays",
+            "type": "promptString",
+            "description": "Days until policy lock (e.g., 45)",
+            "default": "45"
+        },
+        {
+            "id": "currentSlot",
+            "type": "promptString",
+            "description": "Current network slot (optional for approximate beforeSlot)",
+            "default": ""
+        },
+        {
+            "id": "adaLedgerPath",
+            "type": "promptString",
+            "description": "Path to ADA ledger CSV",
+            "default": "${workspaceFolder}/cardano-rwa-qh/reports/ada_ledger.csv"
+        },
+        {
+            "id": "maxOutputs",
+            "type": "promptString",
+            "description": "Max recipients per tx",
+            "default": "80"
         }
     ]
 }

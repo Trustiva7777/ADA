@@ -1,0 +1,11 @@
+{
+  "total_usd": 250000.00,
+  "rows": [
+    {
+      "wallet_address": "addr_test1xxxxx",
+      "tokens_held": "100000",
+      "pro_rata_share": "0.10",
+      "payout_amount_usd": 250000.00
+    }
+  ]
+}

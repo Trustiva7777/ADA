@@ -1,0 +1,22 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "cSpell.words": [
+    "Blockfrost",
+    "Cardano",
+    "Kupo",
+    "Ogmios",
+    "UTxO",
+    "lovelace",
+    "RegD",
+    "RegS",
+    "whitelist",
+    "Unykorn"
+  ]
+}

@@ -1,0 +1,11 @@
+packages: .
+
+-- Point these to your local Plutus repos/versions
+-- Example (adjust to your devbox):
+-- source-repository-package
+--   type: git
+--   location: https://github.com/IntersectMBO/plutus
+--   tag: <commit>
+
+allow-newer: True
+write-ghc-environment-files: never

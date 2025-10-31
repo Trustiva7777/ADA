@@ -59,3 +59,31 @@ trademarks or logos is subject to and must follow
 [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
 Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 Any use of third-party trademarks or logos are subject to those third-party's policies.
+
+## Cardano RWA QH-R1 Docs (investor + ops)
+
+The repo includes an issuance scaffold under `cardano-rwa-qh/` with investor docs, compliance hooks, and VS Code tasks.
+
+- Investor One-Pager: `cardano-rwa-qh/docs/INVESTOR_BRIEF_QH-R1.md`
+- Policy Lock Certificate (to be filled after policy creation): `cardano-rwa-qh/docs/token/Policy_Lock_Certificate.md`
+- Permit Matrix (Phase-1): `cardano-rwa-qh/docs/ops/Permit_Matrix_Phase1.md`
+- Quarterly Payout SOP: `cardano-rwa-qh/docs/ops/Payout_SOP.md`
+- Data Room Index: `cardano-rwa-qh/docs/DATAROOM_INDEX.md`
+
+VS Code tasks are available under `Terminal → Run Task`:
+- Brief: open investor one-pager
+- Proof: validate bundle
+- Policy: plan lock slot (+45d)
+- Snapshot: holders (record date)
+
+Notes:
+- Run Cardano tasks from VS Code tasks, which set the working directory to `cardano-rwa-qh` to avoid pnpm not-found errors in the repo root.
+## Cardano RWA QH-R1 Docs
+
+Investor and operations documents are available under `cardano-rwa-qh/docs/`:
+
+- Investor One-Pager: `cardano-rwa-qh/docs/INVESTOR_BRIEF_QH-R1.md`
+- Policy Lock Certificate: `cardano-rwa-qh/docs/token/Policy_Lock_Certificate.md`
+- Permit Matrix (Phase-1): `cardano-rwa-qh/docs/ops/Permit_Matrix_Phase1.md`
+- Quarterly Payout SOP: `cardano-rwa-qh/docs/ops/Payout_SOP.md`
+- Data Room Index: `cardano-rwa-qh/docs/DATAROOM_INDEX.md`

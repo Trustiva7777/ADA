@@ -1,0 +1,29 @@
+{
+  "network": "Preprod",
+  "mint": [
+    {
+      "policyId": "TESTPOLICY",
+      "assetNameHex": "51482d5231",
+      "quantity": 1000000
+    }
+  ],
+  "metadata": {
+    "label_674": {
+      "attestation": "rwa-suite/chains/cardano/docs/token/attestation.Preprod.json",
+      "doc": "ipfs://TESTCID",
+      "decimals": 2,
+      "name": "QH-R1"
+    }
+  },
+  "inputs": [
+    {
+      "txHash": "\u003CFILL\u003E",
+      "index": 0,
+      "lovelace": 0
+    }
+  ],
+  "change": {
+    "address": "addr_test1qplchng3",
+    "minLovelace": 1500000
+  }
+}

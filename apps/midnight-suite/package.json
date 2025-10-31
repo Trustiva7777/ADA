@@ -1,0 +1,14 @@
+{
+  "name": "midnight-suite",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "night:eligibility": "node ./src/eligibility/index.ts",
+    "night:fresh-addr": "node ./src/wallet/freshAddress.ts",
+    "night:unlocks": "node ./src/ops/unlocks.ts",
+    "night:dust": "node ./src/dust-model/index.ts",
+    "night:portfolio": "node ./src/ops/portfolio.ts",
+    "night:scavenger": "node ./src/scavenger/planner.ts",
+    "schema:check": "node -e \"console.log('Schemas are static; use your validator if needed')\""
+  }
+}

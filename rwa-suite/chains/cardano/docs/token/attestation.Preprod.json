@@ -1,0 +1,31 @@
+{
+  "series": "QH-R1",
+  "network": "Preprod",
+  "policyId": "POLICYID_PLACEHOLDER",
+  "timestamp": "2025-10-30T22:59:30.8885219+00:00",
+  "policyJson": {
+    "path": "cardano-rwa-qh/compliance-policy.json",
+    "sha256": "80f2d6a434be9967b61ba8301779d60f71b9f75b6b0d9bbb1c126008459e7232"
+  },
+  "lockInfo": {
+    "beforeSlot": 123456
+  },
+  "proofs": {
+    "manifest": {
+      "path": "cardano-rwa-qh/docs/sha256-manifest.json",
+      "sha256": "0a910696e8e2f25e630d23379280a01e652b0d21c03493a00f8f83fe4619b00f",
+      "totals": {
+        "files": 18,
+        "bytes": 27039
+      },
+      "generatedAt": "2025-10-30T22:37:13.2161888+00:00"
+    },
+    "allowlistSnapshotSha256": "baf71d970b7dfdbc1a0134adfbd92def1df28656b6a92070a02617e665ee4bbc"
+  },
+  "compliance": {
+    "url": null
+  },
+  "build": {
+    "tool": "HashAttest 1.0 (.NET)"
+  }
+}

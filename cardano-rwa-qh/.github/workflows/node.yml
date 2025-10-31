@@ -1,0 +1,24 @@
+name: CI
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm i -g pnpm
+      - run: pnpm install
+      - run: pnpm build
+      - run: pnpm lint
+      - name: Compliance preflight
+        env:
+          COMPLIANCE_URL: ${{ secrets.COMPLIANCE_URL }}
+          COMPLIANCE_TOKEN: ${{ secrets.COMPLIANCE_TOKEN }}
+        run: pnpm exec tsx src/tools/compliance-check.ts --series QH-R1 --policy ./compliance-policy.json --action mint --ticker QH-R1 --decimals 2 --proof ./docs/qh_r1_proof.template.json --doc ipfs://CID

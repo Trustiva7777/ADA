@@ -1,0 +1,27 @@
+### Mock compliance — good address
+POST http://127.0.0.1:8787/api/verify
+content-type: application/json
+
+{
+  "address": "addr_test1qp9m3xexampleexampleexampleexampleexample",
+  "series": "QH-R1",
+  "regs": ["RegD","RegS"]
+}
+
+### Mock compliance — bad address
+POST http://127.0.0.1:8787/api/verify
+content-type: application/json
+
+{
+  "address": "bad",
+  "series": "QH-R1"
+}
+
+### Mock compliance — sanctioned address
+POST http://127.0.0.1:8787/api/verify
+content-type: application/json
+
+{
+  "address": "addr_test1qpSANCTIONED",
+  "series": "QH-R1"
+}

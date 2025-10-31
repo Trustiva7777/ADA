@@ -1,0 +1,24 @@
+{
+  "series": "QH-R1",
+  "network": "Preprod",
+  "policyId": "POLICYID_PLACEHOLDER",
+  "timestamp": "2025-10-30T22:37:22.7349030\u002B00:00",
+  "proofs": {
+    "manifest": {
+      "path": "cardano-rwa-qh/docs/sha256-manifest.json",
+      "sha256": "0a910696e8e2f25e630d23379280a01e652b0d21c03493a00f8f83fe4619b00f",
+      "totals": {
+        "files": 18,
+        "bytes": 27039
+      },
+      "generatedAt": "2025-10-30T22:37:13.2161888\u002B00:00"
+    },
+    "allowlistSnapshotSha256": null
+  },
+  "compliance": {
+    "url": null
+  },
+  "build": {
+    "tool": "HashAttest 1.0 (.NET)"
+  }
+}

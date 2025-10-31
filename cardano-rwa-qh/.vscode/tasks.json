@@ -1,0 +1,38 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    { "label": "Install deps", "type": "shell", "command": "pnpm install" },
+    { "label": "Install deps (Docker)", "type": "shell", "command": "docker run --rm -v \"${workspaceFolder}\":/work -w /work/cardano-rwa-qh node:20-bullseye bash -lc 'npm i -g pnpm >/dev/null 2>&1; pnpm install'", "problemMatcher": [] },
+    { "label": "Dev: address & UTxOs", "type": "shell", "command": "pnpm dev" },
+    { "label": "Dev: address & UTxOs (Docker)", "type": "shell", "command": "docker run --rm -v \"${workspaceFolder}\":/work -w /work/cardano-rwa-qh node:20-bullseye bash -lc 'npm i -g pnpm >/dev/null 2>&1; pnpm install; npx tsx src/index.ts'", "problemMatcher": [] },
+    { "label": "Policy: create", "type": "shell", "command": "pnpm policy" },
+    { "label": "Policy: create (Docker)", "type": "shell", "command": "docker run --rm -v \"${workspaceFolder}\":/work -w /work/cardano-rwa-qh node:20-bullseye bash -lc 'npm i -g pnpm >/dev/null 2>&1; pnpm install; npx tsx src/policy.ts'", "problemMatcher": [] },
+    { "label": "Mint QH-R1", "type": "shell", "command": "pnpm mint -- --ticker \"QH-R1\" --amount 1000000 --decimals 2 --name \"QuebradaHonda-Royalty-Phase1\"" },
+    { "label": "Mint QH-R1 (Docker)", "type": "shell", "command": "docker run --rm -v \"${workspaceFolder}\":/work -w /work/cardano-rwa-qh node:20-bullseye bash -lc 'npm i -g pnpm >/dev/null 2>&1; pnpm install; npx tsx src/mint.ts --ticker \"QH-R1\" --amount 1000000 --decimals 2 --name \"QuebradaHonda-Royalty-Phase1\"'", "problemMatcher": [] },
+    { "label": "Payouts: plan", "type": "shell", "command": "pnpm exec tsx src/distribute.ts --csv ./docs/qh_qX_YYYY_payouts.csv --mode plan" },
+    { "label": "Payouts: plan (Docker)", "type": "shell", "command": "docker run --rm -v \"${workspaceFolder}\":/work -w /work/cardano-rwa-qh node:20-bullseye bash -lc 'npm i -g pnpm >/dev/null 2>&1; pnpm install; npx tsx src/distribute.ts --csv ./docs/qh_qX_YYYY_payouts.csv --mode plan'", "problemMatcher": [] },
+    { "label": "Validate proof bundle", "type": "shell", "command": "pnpm validate:proof" },
+  { "label": "Compliance: preflight (mint)", "type": "shell", "command": "pnpm compliance:check" },
+  { "label": "Compliance: preflight (mint) (Docker)", "type": "shell", "command": "docker run --rm -e COMPLIANCE_URL -e COMPLIANCE_TOKEN -v \"${workspaceFolder}\":/work -w /work/cardano-rwa-qh node:20-bullseye bash -lc 'npm i -g pnpm >/dev/null 2>&1; pnpm install; npx tsx src/tools/compliance-check.ts --series QH-R1 --policy ./compliance-policy.json --action mint --ticker QH-R1 --decimals 2 --proof ./docs/qh_r1_proof.template.json --doc ipfs://CID'", "problemMatcher": [] },
+    { "label": "Validate proof bundle (Docker)", "type": "shell", "command": "docker run --rm -v \"${workspaceFolder}\":/work -w /work/cardano-rwa-qh node:20-bullseye bash -lc 'npm i -g pnpm >/dev/null 2>&1; pnpm install; npx tsx src/tools/schema-validate.ts --file ./docs/qh_r1_proof.template.json --schema ./docs/SCHEMA_proof_bundle.json'", "problemMatcher": [] },
+  { "label": "Compute slot deadline (+45d)", "type": "shell", "command": "pnpm slot:deadline" },
+  { "label": "Royalty: plan lock slot (+45d)", "type": "shell", "command": "pnpm slot:deadline" },
+  { "label": "Compute slot deadline (+45d) (Docker)", "type": "shell", "command": "docker run --rm -v \"${workspaceFolder}\":/work -w /work/cardano-rwa-qh node:20-bullseye bash -lc 'npm i -g pnpm >/dev/null 2>&1; pnpm install; npx tsx src/tools/slot-deadline.ts --days 45'", "problemMatcher": [] },
+  { "label": "Royalty: plan lock slot (+45d) (Docker)", "type": "shell", "command": "docker run --rm -v \"${workspaceFolder}\":/work -w /work/cardano-rwa-qh node:20-bullseye bash -lc 'npm i -g pnpm >/dev/null 2>&1; pnpm install; npx tsx src/tools/slot-deadline.ts --days 45'", "problemMatcher": [] },
+    { "label": "Snapshot holders (record date)", "type": "shell", "command": "pnpm snapshot" },
+    { "label": "Snapshot holders (Docker)", "type": "shell", "command": "docker run --rm -v \"${workspaceFolder}\":/work -w /work/cardano-rwa-qh node:20-bullseye bash -lc 'npm i -g pnpm >/dev/null 2>&1; pnpm install; npx tsx src/tools/snapshot-holders.ts --policy <POLICYID> --asset 51482d5231'", "problemMatcher": [] },
+    { "label": "Dev: mock compliance", "type": "shell", "command": "tsx src/tools/mock-compliance.ts", "problemMatcher": [] },
+    { "label": "Test: verify (good addr)", "type": "shell", "command": "node -e \"fetch('http://127.0.0.1:8787/api/verify',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({address:'addr_test1qpr8g...',series:'QH-R1'})}).then(r=>r.json()).then(console.log)\"", "dependsOn": ["Dev: mock compliance"], "problemMatcher": [] },
+    { "label": "Test: verify (bad addr)", "type": "shell", "command": "node -e \"fetch('http://127.0.0.1:8787/api/verify',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({address:'not_cardano_addr',series:'QH-R1'})}).then(r=>r.json()).then(console.log)\"", "dependsOn": ["Dev: mock compliance"], "problemMatcher": [] }
+    ,
+    { "label": "Compose: up", "type": "shell", "command": "docker compose up -d", "problemMatcher": [] },
+    { "label": "Compose: down", "type": "shell", "command": "docker compose down", "problemMatcher": [] },
+    { "label": "Logs: node", "type": "shell", "command": "docker logs -f cardano-node", "problemMatcher": [], "isBackground": true },
+    { "label": "Logs: ogmios", "type": "shell", "command": "docker logs -f ogmios", "problemMatcher": [], "isBackground": true },
+    { "label": "Logs: kupo", "type": "shell", "command": "docker logs -f kupo", "problemMatcher": [], "isBackground": true },
+    { "label": "Logs: submit-api", "type": "shell", "command": "docker logs -f cardano-submit-api", "problemMatcher": [], "isBackground": true }
+    ,
+    { "label": "Submit: health", "type": "shell", "command": "pnpm submit:health", "problemMatcher": [] },
+    { "label": "Submit: health (Docker)", "type": "shell", "command": "docker run --rm -v \"${workspaceFolder}\":/work -w /work/cardano-rwa-qh node:20-bullseye bash -lc 'npm i -g pnpm >/dev/null 2>&1; pnpm install; npx tsx src/tools/submit-health.ts'", "problemMatcher": [] }
+  ]
+}

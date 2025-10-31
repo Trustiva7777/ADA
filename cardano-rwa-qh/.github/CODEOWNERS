@@ -1,0 +1,8 @@
+# Require Compliance review on all changes
+*       @your-org/compliance @your-org/legal
+
+# Restrict critical files to compliance owners
+/compliance-policy.json  @your-org/compliance @your-org/legal
+/COMPLIANCE.md           @your-org/compliance @your-org/legal
+/.github/workflows/**    @your-org/compliance @your-org/legal
+/src/tools/compliance-check.ts  @your-org/compliance @your-org/legal

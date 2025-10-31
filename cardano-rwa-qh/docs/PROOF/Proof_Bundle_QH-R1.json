@@ -1,0 +1,71 @@
+{
+  "schema": "qh.proof.v1",
+  "series": "QH-R1",
+  "issuer": {
+    "name": "Barrow Mining SpA",
+    "jurisdiction": "CL",
+    "admin": "Gonzalo Cariola Bruna"
+  },
+  "asset": {
+    "site": "Quebrada Honda I & II",
+    "coords_utm": { "n": 6811610, "e": 354900 },
+    "phase": "Phase-1"
+  },
+  "permitting": {
+    "small_mining_path": true,
+    "concentrator_env_permit": "pending"
+  },
+  "economics": {
+    "throughput_tpm": 20000,
+    "royalty_percent": 0.04,
+    "payout_frequency": "quarterly"
+  },
+  "policy": {
+    "policy_id": "<<<FILL AFTER CREATION>>>",
+    "lock": { "type": "before_slot", "value": "<<<SLOT>>>" }
+  },
+  "reports": [
+    {
+      "title": "NI 43-101 (2020-07)",
+      "sha256": "<<<HASH>>>",
+      "uri": "ipfs://<<<CID>>>",
+      "filename": "technical/NI43-101_QH_I_II_2020-07.pdf"
+    },
+    {
+      "title": "Valuation Update (2024-12-30)",
+      "sha256": "<<<HASH>>>",
+      "uri": "ipfs://<<<CID>>>",
+      "filename": "technical/Valuation_Update_2024-12-30.pdf"
+    },
+    {
+      "title": "Perfil Barrow Mining SpA (2024-12)",
+      "sha256": "<<<HASH>>>",
+      "uri": "ipfs://<<<CID>>>",
+      "filename": "corp/Perfil_Barrow_Mining_SpA_2024-12.pdf"
+    },
+    {
+      "title": "Tramos de Inversión Promedio Minera",
+      "sha256": "<<<HASH>>>",
+      "uri": "ipfs://<<<CID>>>",
+      "filename": "technical/Tramos_de_Inversion_Promedio_Minera.pdf"
+    },
+    {
+      "title": "Presentación QH I & II",
+      "sha256": "<<<HASH>>>",
+      "uri": "ipfs://<<<CID>>>",
+      "filename": "technical/Presentation_QH_I_II.pdf"
+    }
+  ],
+  "legal": [
+    {
+      "title": "Ownership Declaration (2024-11-30)",
+      "sha256": "<<<HASH>>>",
+      "uri": "ipfs://<<<CID>>>",
+      "filename": "legal/Ownership_Declaration_QH_I_II_2024-11-30.pdf"
+    }
+  ],
+  "disclaimers": {
+    "technical_anchor": "NI 43-101 (2020) baseline only",
+    "valuation_note": "2024 price update is market context; not a new resource category."
+  }
+}

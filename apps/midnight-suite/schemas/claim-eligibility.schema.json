@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ClaimEligibility",
+  "type": "object",
+  "properties": {
+    "snapshotDate": { "type": "string", "format": "date" },
+    "thresholdUsd": { "type": "number" },
+    "wallets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "chain": { "type": "string", "enum": ["ADA","BTC","ETH","SOL","XRP","BNB","AVAX","BAT"] },
+          "address": { "type": "string" },
+          "usdAtSnapshot": { "type": "number" },
+          "selfCustody": { "type": "boolean" },
+          "eligible": { "type": "boolean" }
+        },
+        "required": ["chain","address","usdAtSnapshot","selfCustody","eligible"]
+      }
+    }
+  },
+  "required": ["snapshotDate", "thresholdUsd", "wallets"]
+}

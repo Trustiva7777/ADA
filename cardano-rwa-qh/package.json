@@ -1,0 +1,45 @@
+{
+  "name": "cardano-rwa-qh",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p .",
+    "dev": "tsx src/index.ts",
+    "policy": "tsx src/policy.ts",
+    "mint": "tsx src/mint.ts",
+    "distribute": "tsx src/distribute.ts",
+    "ipfs": "tsx src/ipfs.ts",
+    "validate:proof": "tsx src/tools/schema-validate.ts --file ./docs/qh_r1_proof.template.json --schema ./docs/SCHEMA_proof_bundle.json",
+    "slot:deadline": "tsx src/tools/slot-deadline.ts --days 45",
+    "snapshot": "tsx src/tools/snapshot-holders.ts --policy <POLICYID> --asset 51482d5231",
+    "mock:compliance": "tsx src/tools/mock-compliance.ts",
+    "submit:health": "tsx src/tools/submit-health.ts",
+  "compliance:check": "tsx src/tools/compliance-check.ts --series QH-R1 --policy ./compliance-policy.json --action mint --ticker QH-R1 --decimals 2 --proof ./docs/qh_r1_proof.template.json --doc ipfs://CID",
+    "proofs:sha256": "tsx src/tools/hash-manifest.ts --dir ./docs --out ./docs/sha256-manifest.json --ignore .git,node_modules,dist,bin,obj",
+    "attest:issuance": "tsx src/tools/gen-attestation.ts --policy <POLICYID> --network Preprod --manifest ./docs/sha256-manifest.json --out ./docs/attestation.json",
+    "hash:file": "tsx src/tools/hash-file.ts",
+    "attest:policy": "tsx src/tools/attestation-json.ts",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.5",
+    "fast-csv": "^5.0.1",
+    "lucid-cardano": "^0.10.7"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3",
+    "@types/node": "^20.16.10",
+    "@typescript-eslint/eslint-plugin": "^8.8.0",
+    "@typescript-eslint/parser": "^8.8.0",
+    "eslint": "^9.11.1",
+    "@eslint/js": "^9.11.1",
+    "typescript-eslint": "^8.8.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3"
+  }
+}

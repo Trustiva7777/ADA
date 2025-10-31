@@ -290,6 +290,12 @@ FakesAssemblies/
 .ntvs_analysis.dat
 node_modules/
 
+# Local wallet and draft outputs (sensitive/do not commit)
+Cardano/Dev/Wallet/
+cardano-rwa-qh/out/
+cardano-rwa-qh/reports/ada_ledger.csv
+cardano-rwa-qh/reports/lock_plan.beforeSlot
+
 # Visual Studio 6 build log
 *.plg
 

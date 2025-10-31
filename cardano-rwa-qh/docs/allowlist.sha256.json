@@ -1,0 +1,11 @@
+{
+  "file": "wallets.csv",
+  "path": "/workspaces/dotnet-codespaces/apps/midnight-suite/data/wallets.csv",
+  "size": 127,
+  "rawSha256": "2007e41ed0efacb9cc2863ea4da33ba96b3ca1146d9ff3ef4d3f849f2fc2474a",
+  "canonical": {
+    "algorithm": "csv-sort",
+    "sha256": "e1b464b5fd07acb0d78582a5e73df745dbdb047dc76cc53e2987c6bb4ea4a66e",
+    "notes": "Header preserved; rows trimmed and lexicographically sorted; LF newlines"
+  }
+}

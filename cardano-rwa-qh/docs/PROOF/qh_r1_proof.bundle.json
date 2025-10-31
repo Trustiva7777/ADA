@@ -1,0 +1,33 @@
+{
+  "schema": "qh.proof.v1",
+  "series": "QH-R1",
+  "asset": {
+    "issuer": "Barrow Mining SpA",
+    "jurisdiction": "CL",
+    "site": "Quebrada Honda I & II",
+    "coords": { "utm_n": 6811610, "utm_e": 354900 }
+  },
+  "permits": {
+    "small_mining": true,
+    "concentrator_env_permit": "pending"
+  },
+  "ops": {
+    "throughput_tpm": 20000,
+    "products": ["Au conc", "Cu conc 20%", "lump (ENAMI)"]
+  },
+  "economics": {
+    "phase": "Phase-1",
+    "capex_usd": 10000000,
+    "royalty_percent": 0.04,
+    "payout_frequency": "quarterly",
+    "policy_lock": "before_slot_120000000"
+  },
+  "reports": [
+    { "title": "NI 43-101 (2020-07)", "hash_sha256": "a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890", "uri": "ipfs://QmYwAPJzv5CZsnAztx8au5qK8Vz5pJcQH8kJMjH1h2L8n" },
+    { "title": "Valuation (2024-12-30)", "hash_sha256": "b2c3d4e5f67890123456789012345678901234567890123456789012345678901", "uri": "ipfs://QmYwAPJzv5CZsnAztx8au5qK8Vz5pJcQH8kJMjH1h2L8o" },
+    { "title": "Barrow Mining SpA Profile", "hash_sha256": "c3d4e5f678901234567890123456789012345678901234567890123456789012", "uri": "ipfs://QmYwAPJzv5CZsnAztx8au5qK8Vz5pJcQH8kJMjH1h2L8p" },
+    { "title": "Investment Tranches (Phase-1..4)", "hash_sha256": "d4e5f6789012345678901234567890123456789012345678901234567890123", "uri": "ipfs://QmYwAPJzv5CZsnAztx8au5qK8Vz5pJcQH8kJMjH1h2L8q" },
+    { "title": "QH I & II Presentation", "hash_sha256": "e5f67890123456789012345678901234567890123456789012345678901234", "uri": "ipfs://QmYwAPJzv5CZsnAztx8au5qK8Vz5pJcQH8kJMjH1h2L8r" }
+  ],
+  "attachments": []
+}

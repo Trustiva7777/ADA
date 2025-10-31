@@ -1,0 +1,11 @@
+{
+  "series": "QH-R1",
+  "allowedRegs": ["RegD", "RegS"],
+  "requireProof": true,
+  "evidenceReportsMin": 1,
+  "decimals": { "min": 0, "max": 6 },
+  "requireTimeLock": true,
+  "allowJurisdictions": ["US", "GB", "CL", "CA", "CH", "ES"],
+  "denyCountries": ["IR", "KP", "CU", "SY", "RU"],
+  "notes": "Customize this file with counsel. Lists are illustrative." 
+}

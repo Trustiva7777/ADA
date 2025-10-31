@@ -1,0 +1,11 @@
+{
+  "policyId": "<<<AFTER_POLICY_CREATE>>>",
+  "assetNameHex": "51482d5231",
+  "metadata721": {
+    "name": "QuebradaHonda-Royalty-Phase1",
+    "ticker": "QH-R1",
+    "decimals": 2,
+    "description": "Royalty on Net Revenue from Quebrada Honda I & II (Phase 1).",
+    "docs": ["ipfs://<<<CID_OF_Proof_Bundle_QH-R1.json>>>"]
+  }
+}

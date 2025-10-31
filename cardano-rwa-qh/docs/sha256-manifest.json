@@ -1,0 +1,107 @@
+{
+  "generatedAt": "2025-10-30T22:37:13.2161888\u002B00:00",
+  "rootDir": "docs",
+  "ignore": [
+    ".git",
+    "node_modules",
+    "dist",
+    "bin",
+    "obj"
+  ],
+  "entries": [
+    {
+      "path": "DATAROOM_INDEX.md",
+      "size": 1610,
+      "sha256": "c73b36ae94b968f140f1a41c3b83c5f46c310c75739203671e6cd36dff95dca0"
+    },
+    {
+      "path": "FINANCE_MODELS/royalty_waterfall_notes.md",
+      "size": 591,
+      "sha256": "3425b6ffa889c2d23c441aa2219dfc347640b7bd315c2febb39c24d483378ae2"
+    },
+    {
+      "path": "INVESTOR_BRIEF_QH-R1.md",
+      "size": 2777,
+      "sha256": "33389472daf5cb342d4e8415817dbd82bae2b40b07445cc69b0de4eec9a0132f"
+    },
+    {
+      "path": "ISSUANCE_CHECKLIST_QH-R1.md",
+      "size": 1390,
+      "sha256": "6d8c788fb71dd62b426a121f971c0a4fa255c3b69bb0797f14b1b31dc9219911"
+    },
+    {
+      "path": "MAINNET_READINESS_CHECKLIST.md",
+      "size": 3281,
+      "sha256": "9274efd171615cdc35c80dc0aadd6f98680ae12921a85e064e9730ac7a87c709"
+    },
+    {
+      "path": "PLAN_QH_R1.md",
+      "size": 4676,
+      "sha256": "95fcf53003865e6219e624eeae4be895cb4f2fef9a0030df1a40debf2c601aff"
+    },
+    {
+      "path": "PROOF/Proof_Bundle_QH-R1.json",
+      "size": 1962,
+      "sha256": "563f3d2be552918d55fc28a3959c6173b1f2a30f26ec0072ca53cdec0de99622"
+    },
+    {
+      "path": "PROOF/qh_r1_proof.bundle.json",
+      "size": 1138,
+      "sha256": "654a8eb10495992d1dcff0b8a919f6195287ae304945490dc69e34e9606941a4"
+    },
+    {
+      "path": "PROOF/sha256_manifest.csv",
+      "size": 1060,
+      "sha256": "58a7506745b191e2047928c10b1018b708a69d18d0eb7c26a5cfcc9360a54776"
+    },
+    {
+      "path": "QH_Scenario_Simplified.md",
+      "size": 2346,
+      "sha256": "3c4b1009ee41fd95d6f9318ade1dc86448b0c4b9d7e3cc21c6ab5d81f6913aec"
+    },
+    {
+      "path": "SCHEMA_proof_bundle.json",
+      "size": 1559,
+      "sha256": "617bc3d821b5c2b0a1b610fc5eb059e32e8d902e1c7ed5f471bb0dd6484b7cb8"
+    },
+    {
+      "path": "VALUATION_SNAPSHOT_2025-10-30.md",
+      "size": 1005,
+      "sha256": "6a3ba2171be7394162c58cebc27c7a902f6b372b99a1710426cbd6c404535059"
+    },
+    {
+      "path": "ops/Payout_SOP.md",
+      "size": 657,
+      "sha256": "0dec45ca5d6843c0393e42d9a03ed3e2285c2fa73f436b10c60eb065addea346"
+    },
+    {
+      "path": "ops/Permit_Matrix_Phase1.md",
+      "size": 973,
+      "sha256": "d5c2d4eb24e750ffd88650ac9fa729f61edc535782ae612b0fc4837de7eefb1c"
+    },
+    {
+      "path": "qh_r1_payouts_template.csv",
+      "size": 112,
+      "sha256": "3dc48b82970c0d65f43e0742d2b8447861cc3cccb2930656acba0bf00b298dfd"
+    },
+    {
+      "path": "qh_r1_proof.template.json",
+      "size": 1174,
+      "sha256": "d018cc38634c7e79dc37c1b17c04d2e035eeeba858682974ab5e5b78850404bc"
+    },
+    {
+      "path": "token/Policy_Lock_Certificate.md",
+      "size": 397,
+      "sha256": "367f7ef96ca012c179ef7df08b87c552d06eb273e92659b25d1675c2d98e115b"
+    },
+    {
+      "path": "token_metadata_snippet.json",
+      "size": 331,
+      "sha256": "44ba637523f3beca2ca9b13aea440819121a5f08ebed7f1ca5768c96f23ae4d5"
+    }
+  ],
+  "totals": {
+    "files": 18,
+    "bytes": 27039
+  }
+}

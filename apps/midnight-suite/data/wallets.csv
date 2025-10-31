@@ -1,0 +1,5 @@
+chain,address,usdAtSnapshot,selfCustody
+ADA,addr1...,1500,true
+ETH,0xabc...,420,true
+SOL,SoL111...,80,true
+BTC,bc1q...,0,false

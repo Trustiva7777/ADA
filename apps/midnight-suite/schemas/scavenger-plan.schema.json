@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ScavengerPlan",
+  "type": "object",
+  "properties": {
+    "horizonDays": { "type": "number" },
+    "assumptions": {
+      "type": "object",
+      "properties": {
+        "networkDifficulty": { "type": "number" },
+        "rngVolatility": { "type": "number" },
+        "remainingPool": { "type": "number" },
+        "unitHashrate": { "type": "number" }
+      },
+      "required": ["networkDifficulty","rngVolatility","remainingPool","unitHashrate"]
+    },
+    "yourHashrate": { "type": "number" },
+    "expectedFinds": { "type": "number" },
+    "expectedNight": { "type": "number" },
+    "p10Night": { "type": "number" },
+    "p90Night": { "type": "number" }
+  },
+  "required": [
+    "horizonDays",
+    "assumptions",
+    "yourHashrate",
+    "expectedFinds",
+    "expectedNight",
+    "p10Night",
+    "p90Night"
+  ]
+}

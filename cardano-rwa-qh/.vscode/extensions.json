@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "streetsidesoftware.code-spell-checker",
+    "oderwat.indent-rainbow",
+    "ms-vscode.vscode-typescript-next",
+    "usernamehw.errorlens",
+    "humao.rest-client"
+  ]
+}

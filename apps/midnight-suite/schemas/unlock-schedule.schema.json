@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UnlockSchedule",
+  "type": "object",
+  "properties": {
+    "startDate": { "type": "string", "format": "date" },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "date": { "type": "string", "format": "date" },
+          "percent": { "type": "number" }
+        },
+        "required": ["label","date","percent"]
+      }
+    }
+  },
+  "required": ["startDate","events"]
+}

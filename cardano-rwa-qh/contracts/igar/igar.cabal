@@ -1,0 +1,46 @@
+cabal-version:      >=1.24
+name:               igar
+version:            0.1.0.0
+license:            ALL-RIGHTS-RESERVED
+author:             Unykorn Global Finance
+maintainer:         engineering@unykorn.org
+build-type:         Simple
+
+library
+  hs-source-dirs:   src
+  exposed-modules:
+    IGAR.Types
+    IGAR.Utils.Crypto
+    IGAR.Utils.DatumCodec
+    IGAR.Policy.AllowlistNFT
+    IGAR.Policy.SeriesToken
+    IGAR.Validator.ComplianceRef
+    IGAR.Oracle.Attestations
+    IGAR.Governance.MultiSig
+    IGAR.Validator.RoyaltyVault
+  build-depends:
+      base >=4.14 && <5
+    , aeson
+    , bytestring
+    , text
+    , containers
+    , plutus-ledger-api
+    , plutus-tx
+    , plutus-tx-plugin
+  default-language: Haskell2010
+  ghc-options: -Wall -fobject-code -O2
+
+Test-Suite igar-tests
+  type:             exitcode-stdio-1.0
+  hs-source-dirs:   test
+  main-is:          Spec/PolicySeriesToken.hs
+  other-modules:
+    Spec.RoyaltyVaultState
+    Spec.Governance
+    Spec.NegativePaths
+  build-depends:
+      base
+    , igar
+    , plutus-ledger-api
+    , QuickCheck
+  default-language: Haskell2010

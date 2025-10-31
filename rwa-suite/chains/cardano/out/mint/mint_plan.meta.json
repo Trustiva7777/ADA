@@ -1,0 +1,9 @@
+{
+  "policyId": "TESTPOLICY",
+  "assetNameHex": "51482d5231",
+  "amount": 1000000,
+  "decimals": "2",
+  "docCid": "ipfs://TESTCID",
+  "attestationPath": "rwa-suite/chains/cardano/docs/token/attestation.Preprod.json",
+  "network": "Preprod"
+}
