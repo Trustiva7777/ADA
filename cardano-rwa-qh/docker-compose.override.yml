@@ -1,0 +1,67 @@
+# Development Overrides for Docker Compose
+# This file is automatically merged with docker-compose.yml when running in development
+# For production, use: docker-compose -f docker-compose.yml up
+
+version: "3.9"
+
+services:
+  cardano-node:
+    # Mount bind for local database persistence across restarts
+    volumes:
+      - ./data/node-db:/data
+    # Disable read-only for development convenience
+    read_only: false
+    tmpfs:
+      - /tmp
+
+  ogmios:
+    # Debug logging for development
+    environment:
+      - LOG_LEVEL=debug
+    read_only: false
+    tmpfs:
+      - /tmp
+
+  kupo:
+    # Faster sync for development
+    command: [
+      "--node-socket", "/ipc/node.socket",
+      "--host", "0.0.0.0",
+      "--port", "1442",
+      "--match", ".*",
+      "--since", "origin",
+      "--log-level", "debug"
+    ]
+    read_only: false
+    tmpfs:
+      - /tmp
+
+  submit-api:
+    read_only: false
+    tmpfs:
+      - /tmp
+
+  prometheus:
+    # Shorter retention for development to save disk
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=24h'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./data/prometheus:/prometheus
+    read_only: false
+
+  grafana:
+    # Default admin credentials for development
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+    read_only: false
+
+# Development network configuration
+networks:
+  cardano-net:
+    driver: bridge

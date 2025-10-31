@@ -1,4 +1,12 @@
 version: "3.9"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+    labels: "service=cardano-rwa"
+
 services:
   cardano-node:
     image: inputoutput/cardano-node:8.11.0
@@ -18,11 +26,14 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    restart: unless-stopped
+    logging: *default-logging
     healthcheck:
       test: ["CMD", "sh", "-c", "ls /ipc/node.socket"]
       interval: 10s
       timeout: 3s
       retries: 10
+      start_period: 30s
     deploy:
       resources:
         limits:
@@ -37,7 +48,8 @@ services:
     container_name: ogmios
     user: "1000:1000"  # Run as non-root user
     depends_on:
-      - cardano-node
+      cardano-node:
+        condition: service_healthy
     environment:
       - OGMIOS_NETWORK=preview
       - OGMIOS_NODE_SOCKET=/ipc/node.socket
@@ -52,12 +64,15 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    restart: unless-stopped
+    logging: *default-logging
     command: ["--node-socket", "/ipc/node.socket", "--host", "0.0.0.0", "--port", "1337"]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:1337/health"]
       interval: 10s
       timeout: 3s
       retries: 10
+      start_period: 20s
     deploy:
       resources:
         limits:
@@ -72,7 +87,8 @@ services:
     container_name: kupo
     user: "1000:1000"  # Run as non-root user
     depends_on:
-      - cardano-node
+      cardano-node:
+        condition: service_healthy
     command: [
       "--node-socket", "/ipc/node.socket",
       "--host", "0.0.0.0",
@@ -92,11 +108,14 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    restart: unless-stopped
+    logging: *default-logging
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:1442"]
       interval: 15s
       timeout: 5s
       retries: 10
+      start_period: 30s
     deploy:
       resources:
         limits:
@@ -111,7 +130,8 @@ services:
     container_name: cardano-submit-api
     user: "1000:1000"  # Run as non-root user
     depends_on:
-      - cardano-node
+      cardano-node:
+        condition: service_healthy
     environment:
       - CARDANO_NODE_SOCKET_PATH=/ipc/node.socket
     volumes:
@@ -125,12 +145,15 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    restart: unless-stopped
+    logging: *default-logging
     command: ["--socket-path", "/ipc/node.socket", "--host", "0.0.0.0", "--port", "8090"]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8090/health"]
       interval: 10s
       timeout: 3s
       retries: 10
+      start_period: 15s
     deploy:
       resources:
         limits:
@@ -146,7 +169,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -155,6 +178,15 @@ services:
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - cardano-net
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
     deploy:
       resources:
         limits:
@@ -168,16 +200,27 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     depends_on:
-      - prometheus
+      prometheus:
+        condition: service_started
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel
     ports:
       - "3000:3000"
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
-      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - cardano-net
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
     deploy:
       resources:
         limits:
