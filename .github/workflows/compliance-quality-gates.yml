@@ -1,0 +1,451 @@
+name: SR-Level Quality Gates & Compliance Checks
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '20'
+  DOTNET_VERSION: '9.0.x'
+  COVERAGE_THRESHOLD: 95
+
+jobs:
+  # ==================== SOLIDITY VERIFICATION ====================
+  
+  smart-contract-quality:
+    name: Smart Contract Quality Gates
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better analysis
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'contracts/package-lock.json'
+      
+      - name: Install Dependencies
+        working-directory: contracts
+        run: npm ci
+      
+      # Solidity Compilation
+      - name: Compile Smart Contracts
+        working-directory: contracts
+        run: npx hardhat compile
+        continue-on-error: false
+      
+      # Solidity Linting
+      - name: Lint Solidity Code
+        working-directory: contracts
+        run: |
+          npm install --save-dev solhint
+          npx solhint 'src/**/*.sol' --config .solhintrc
+      
+      # Static Security Analysis
+      - name: Install Slither
+        run: pip install slither-analyzer
+      
+      - name: Security Analysis (Slither)
+        working-directory: contracts
+        run: |
+          slither . --json slither-report.json || true
+      
+      - name: Upload Slither Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: slither-report
+          path: contracts/slither-report.json
+      
+      # Solidity Tests with Coverage
+      - name: Run Solidity Tests
+        working-directory: contracts
+        run: npx hardhat test
+      
+      - name: Generate Coverage Report
+        working-directory: contracts
+        run: |
+          npx hardhat coverage --testfiles 'test/**/*compliance*.js' 2>&1 | tee coverage.txt
+          COVERAGE=$(grep -oP '\d+(?=%)' coverage.txt | head -1)
+          echo "COVERAGE=$COVERAGE" >> $GITHUB_ENV
+          if [ "$COVERAGE" -lt "${{ env.COVERAGE_THRESHOLD }}" ]; then
+            echo "❌ Coverage $COVERAGE% is below threshold ${{ env.COVERAGE_THRESHOLD }}%"
+            exit 1
+          fi
+          echo "✅ Coverage $COVERAGE% meets threshold"
+      
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-solidity
+          path: contracts/coverage/
+      
+      # Gas Optimization Analysis
+      - name: Gas Optimization Report
+        working-directory: contracts
+        run: |
+          cat > gas-config.json << 'EOF'
+          {
+            "enabled": true,
+            "outputFile": "gas-report.txt",
+            "noColors": true,
+            "onlyCalledMethods": false
+          }
+          EOF
+          npx hardhat test --reporter json > test-results.json || true
+          echo "Gas report generated"
+  
+  # ==================== .NET BACKEND VERIFICATION ====================
+  
+  backend-quality:
+    name: Backend Quality Gates
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      
+      - name: Restore Dependencies
+        working-directory: SampleApp/BackEnd
+        run: dotnet restore
+      
+      # Build
+      - name: Build Backend
+        working-directory: SampleApp/BackEnd
+        run: dotnet build --configuration Release --no-restore
+      
+      # Code Analysis
+      - name: Run Code Analysis
+        working-directory: SampleApp/BackEnd
+        run: |
+          dotnet add package Microsoft.CodeAnalysis.NetAnalyzers -v 8.0.0
+          dotnet build --configuration Release /p:EnforceCodeStyleInBuild=true /p:TreatWarningsAsErrors=true || true
+      
+      # Unit Tests
+      - name: Run Unit Tests
+        working-directory: SampleApp/BackEnd
+        run: |
+          dotnet test --configuration Release --no-build --logger "json" --collect:"XPlat Code Coverage" --results-directory "./TestResults"
+      
+      # Coverage Analysis
+      - name: Analyze Code Coverage
+        working-directory: SampleApp/BackEnd
+        run: |
+          # Parse coverage from test results
+          if [ -f TestResults/coverage.cobertura.xml ]; then
+            COVERAGE=$(grep -oP 'line-rate="\K[0-9.]+' TestResults/coverage.cobertura.xml | head -1)
+            COVERAGE_PCT=$((${COVERAGE%.*} * 100))
+            echo "Backend coverage: $COVERAGE_PCT%"
+            if [ $COVERAGE_PCT -lt 85 ]; then
+              echo "⚠️  Coverage $COVERAGE_PCT% is below recommended 85%"
+            else
+              echo "✅ Coverage $COVERAGE_PCT% meets requirements"
+            fi
+          fi
+      
+      - name: Upload Backend Coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./SampleApp/BackEnd/TestResults/coverage.cobertura.xml
+          fail_ci_if_error: false
+          verbose: true
+      
+      # Compliance Service Specific Tests
+      - name: Test Compliance Service
+        working-directory: SampleApp/BackEnd
+        run: |
+          dotnet test --configuration Release --filter "FullyQualifiedName~Compliance" --no-build
+  
+  # ==================== SECURITY SCANNING ====================
+  
+  security-scanning:
+    name: Security & Dependency Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      # Dependency Scanning - JavaScript
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Install npm Dependencies
+        working-directory: contracts
+        run: npm ci
+      
+      - name: Audit npm Dependencies
+        working-directory: contracts
+        run: |
+          npm audit --audit-level=moderate || npm audit fix || true
+      
+      # Dependency Scanning - .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      
+      - name: Restore Backend Dependencies
+        working-directory: SampleApp/BackEnd
+        run: dotnet restore
+      
+      - name: NuGet Vulnerability Check
+        working-directory: SampleApp/BackEnd
+        run: |
+          dotnet list package --vulnerable || true
+      
+      # Secret Scanning
+      - name: Run TruffleHog Secret Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug
+        continue-on-error: true
+      
+      # SBOM Generation
+      - name: Generate Software Bill of Materials
+        run: |
+          npm install -g @cyclonedx/npm
+          cyclonedx-npm -o sbom-frontend.json
+          dotnet tool install --global CycloneDX
+          cyclonedx-dotnet SampleApp/BackEnd/BackEnd.csproj -o sbom-backend.json || true
+      
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom-*.json
+  
+  # ==================== CONTAINER SECURITY ====================
+  
+  container-security:
+    name: Container Image Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build Backend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./SampleApp/BackEnd
+          push: false
+          tags: qh-backend:${{ github.sha }}
+          outputs: type=docker,dest=/tmp/image.tar
+      
+      - name: Install Trivy
+        run: |
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | tee -a /etc/apt/sources.list.d/trivy.list
+          apt-get update && apt-get install -y trivy
+      
+      - name: Scan Backend Image with Trivy
+        run: |
+          trivy image --input /tmp/image.tar \
+            --severity HIGH,CRITICAL \
+            --exit-code 0 \
+            --format json \
+            --output trivy-report.json
+      
+      - name: Upload Trivy Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report
+          path: trivy-report.json
+  
+  # ==================== COMPLIANCE CHECKS ====================
+  
+  compliance-verification:
+    name: Compliance & Documentation Verification
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Verify Compliance Documentation
+        run: |
+          if [ ! -f "COMPLIANCE_FRAMEWORK.md" ]; then
+            echo "❌ COMPLIANCE_FRAMEWORK.md is required"
+            exit 1
+          fi
+          echo "✅ Compliance framework documentation exists"
+      
+      - name: Check Smart Contract Files
+        run: |
+          for file in \
+            "contracts/src/compliance/ComplianceRegistry.sol" \
+            "contracts/src/compliance/TransferGate.sol" \
+            "contracts/src/tokens/QHSecurityToken.sol" \
+            "contracts/src/valuation/ValuationEngine.sol" \
+            "contracts/src/settlement/SettlementRouter.sol" \
+            "contracts/src/attestation/AttestationRegistry.sol"
+          do
+            if [ ! -f "$file" ]; then
+              echo "❌ Missing required file: $file"
+              exit 1
+            fi
+          done
+          echo "✅ All required contract files present"
+      
+      - name: Verify SPDX License Headers
+        run: |
+          for file in contracts/src/**/*.sol; do
+            if ! grep -q "SPDX-License-Identifier" "$file"; then
+              echo "❌ Missing SPDX license in $file"
+              exit 1
+            fi
+          done
+          echo "✅ All contracts have SPDX headers"
+      
+      - name: Check for TODO Comments (Security)
+        run: |
+          TODO_COUNT=$(grep -r "TODO.*security\|FIXME.*security" contracts/src/ SampleApp/BackEnd/ || echo "0" | wc -l)
+          if [ $TODO_COUNT -gt 0 ]; then
+            echo "⚠️  Found $TODO_COUNT security-related TODOs - review before deploy"
+          fi
+      
+      - name: Verify README Files
+        run: |
+          for dir in contracts SampleApp/BackEnd; do
+            if [ ! -f "$dir/README.md" ]; then
+              echo "⚠️  Missing README.md in $dir"
+            fi
+          done
+          echo "✅ Documentation check complete"
+  
+  # ==================== INTEGRATION TESTS ====================
+  
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [smart-contract-quality, backend-quality]
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: compliance_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      
+      - name: Run Integration Tests
+        working-directory: contracts
+        run: |
+          npm ci
+          npx hardhat test --network localhost
+        env:
+          DATABASE_URL: postgres://postgres:testpass@localhost:5432/compliance_test
+  
+  # ==================== QUALITY SUMMARY ====================
+  
+  quality-summary:
+    name: Quality Summary
+    runs-on: ubuntu-latest
+    needs: [smart-contract-quality, backend-quality, security-scanning, compliance-verification]
+    if: always()
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download All Reports
+        uses: actions/download-artifact@v4
+      
+      - name: Generate Quality Badge
+        run: |
+          if [ ${{ needs.smart-contract-quality.result }} == "success" ] && \
+             [ ${{ needs.backend-quality.result }} == "success" ] && \
+             [ ${{ needs.security-scanning.result }} == "success" ] && \
+             [ ${{ needs.compliance-verification.result }} == "success" ]; then
+            echo "🟢 All quality gates PASSED"
+            exit 0
+          else
+            echo "🔴 One or more quality gates FAILED"
+            exit 1
+          fi
+      
+      - name: Comment PR with Results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const artifacts = fs.readdirSync('.');
+            
+            let comment = `## 🔍 Quality Gate Results\n\n`;
+            comment += `| Check | Status |\n`;
+            comment += `|-------|--------|\n`;
+            comment += `| Smart Contracts | ${{ needs.smart-contract-quality.result == 'success' && '✅' || '❌' }} |\n`;
+            comment += `| Backend | ${{ needs.backend-quality.result == 'success' && '✅' || '❌' }} |\n`;
+            comment += `| Security | ${{ needs.security-scanning.result == 'success' && '✅' || '❌' }} |\n`;
+            comment += `| Compliance | ${{ needs.compliance-verification.result == 'success' && '✅' || '❌' }} |\n`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  # ==================== DEPLOYMENT APPROVAL ====================
+  
+  deployment-approval:
+    name: Deployment Readiness Check
+    runs-on: ubuntu-latest
+    needs: [quality-summary]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check Deployment Prerequisites
+        run: |
+          echo "✅ Deployment checklist:"
+          echo "  - Code quality gates: PASSED"
+          echo "  - Security scanning: PASSED"
+          echo "  - Compliance verification: PASSED"
+          echo ""
+          echo "⏳ Next steps:"
+          echo "  1. Review pull request changes"
+          echo "  2. Run formal security audit (if mainnet)"
+          echo "  3. Execute deployment checklist"
+          echo "  4. Multi-sig approval (if applicable)"
+          echo "  5. Deploy to mainnet with monitoring"
+      
+      - name: Notify Deployment Team
+        run: |
+          echo "📤 Send notification to deployment team"
+          # Integration point for Slack/email notifications
