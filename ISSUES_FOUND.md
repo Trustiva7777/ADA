@@ -1,0 +1,4 @@
+- Verify .env is in .gitignore
+- Services lack restart policies
+- Review docker-compose.yml for hardcoded secrets
+- Review onboard.sh for hardcoded credentials

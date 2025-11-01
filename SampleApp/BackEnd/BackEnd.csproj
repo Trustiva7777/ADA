@@ -8,8 +8,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- API Documentation -->
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.*" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.0.*" />
+    
+    <!-- Observability: Structured Logging -->
+    <PackageReference Include="Serilog" Version="4.2.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.1.1" />
+    <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
+    
+    <!-- Resilience: Circuit Breakers, Retry Logic, Timeouts -->
+    <PackageReference Include="Polly" Version="8.4.1" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.0" />
+    
+    <!-- Testing Support -->
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.0" />
+    
+    <!-- Configuration -->
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
   </ItemGroup>
 
 </Project>

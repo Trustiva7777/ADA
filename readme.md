@@ -98,7 +98,346 @@ Cardano RWA is a modular, open-source platform for tokenizing real-world assets 
 - ⚡ **Automated flows**: Policy creation, attestation, minting, and payouts
 - 🔗 **Interoperable**: .NET, TypeScript, Docker, and Cardano-native standards
 
+## 🚀 Quick Start
 
+### Prerequisites
+
+- Docker & Docker Compose
+- .NET SDK 9.0+
+- Git
+- 8GB+ RAM
+
+### One-Command Setup
+
+```bash
+# Clone and start
+git clone https://github.com/Trustiva7777/dotnet-codespaces.git
+cd dotnet-codespaces
+./scripts/onboard.sh
+```
+
+**Access Services:**
+
+- **Frontend:** http://localhost:8081
+- **Backend API:** http://localhost:8080
+- **Swagger Docs:** http://localhost:8080/swagger
+- **Grafana:** http://localhost:3000 (admin/admin)
+- **Prometheus:** http://localhost:9090
+
+## 📚 Documentation
+
+| Document | Purpose |
+|----------|---------|
+| **[DEVELOPER.md](./DEVELOPER.md)** | Comprehensive developer guide, service setup, troubleshooting |
+| **[API.md](./API.md)** | REST API endpoints, OpenAPI specs, integration examples |
+| **[ARCHITECTURE.md](./ARCHITECTURE.md)** | System diagrams, data flows, scalability patterns |
+
+## 🏗️ Local Development Services
+
+The platform includes a complete Docker Compose environment:
+
+### Core Services
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| **Frontend** | 8081 | Blazor Server UI |
+| **Backend** | 8080 | ASP.NET Core REST API |
+| **PostgreSQL** | 5432 | Primary database |
+| **IPFS** | 5001, 8080 | Decentralized file storage |
+
+### Blockchain Services
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| **Cardano Node** | 3001 | Cardano blockchain (preview testnet) |
+| **Ogmios** | 1337 | Blockchain query API |
+
+### Monitoring
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| **Prometheus** | 9090 | Metrics collection |
+| **Grafana** | 3000 | Metrics visualization |
+
+### Starting Services
+
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+
+# View service status
+docker-compose ps
+```
+
+## 🔧 Common Development Tasks
+
+### Building Locally
+
+```bash
+# Build backend
+dotnet build SampleApp/BackEnd/BackEnd.csproj
+
+# Build frontend
+dotnet build SampleApp/FrontEnd/FrontEnd.csproj
+
+# Run tests
+dotnet test
+```
+
+### Database Management
+
+```bash
+# Connect to PostgreSQL
+docker-compose exec db psql -U postgres -d sampledb
+
+# Create migrations
+dotnet ef migrations add MigrationName
+
+# Update database
+dotnet ef database update
+```
+
+### Secrets & Environment Variables
+
+Secrets are managed via `.env` file (never commit to Git):
+
+```bash
+# Copy example
+cp .env.example .env
+
+# Edit your local secrets
+nano .env
+```
+
+For production, use:
+- AWS Secrets Manager
+- Azure Key Vault
+- HashiCorp Vault
+
+## 🔐 Security
+
+### Features
+
+- JWT-based authentication
+- Role-based access control (RBAC)
+- Input validation & sanitization
+- SQL injection prevention
+- TLS/HTTPS encryption
+- Audit logging
+- Rate limiting
+
+### Best Practices
+
+1. Never commit `.env` files with real secrets
+2. Rotate credentials regularly
+3. Use HTTPS in production
+4. Enable MFA for admin accounts
+5. Review audit logs regularly
+6. Keep dependencies updated
+
+## 📊 Monitoring & Observability
+
+### Metrics
+
+Monitor system health via Grafana dashboards:
+
+- Request rates and latency
+- Database performance
+- Container resource usage
+- Blockchain sync status
+- IPFS performance
+
+### Health Checks
+
+```bash
+# Backend
+curl http://localhost:8080/health
+
+# Frontend
+curl http://localhost:8081/health
+
+# Database
+docker-compose exec db pg_isready
+
+# IPFS
+curl http://localhost:5001/api/v0/id
+
+# Cardano
+curl http://localhost:1337/health
+```
+
+## 🚢 Deployment
+
+### Production Deployment
+
+The platform can be deployed to:
+
+- **AWS:** ECS, RDS, ALB, CloudWatch
+- **Azure:** App Service, SQL Database, Application Insights
+- **Kubernetes:** Helm charts available
+- **Docker:** Docker Swarm or Docker Host
+
+### Deployment Guide
+
+For detailed deployment instructions:
+1. Review [DEPLOYMENT.md](./cardano-rwa-qh/DEPLOY.md) (if available)
+2. Configure environment for your target platform
+3. Set up SSL certificates
+4. Configure backups and disaster recovery
+5. Deploy monitoring and alerting
+
+## 🤝 Contributing
+
+We welcome contributions! Please:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Workflow
+
+```bash
+# 1. Run onboarding
+./scripts/onboard.sh
+
+# 2. Create feature branch
+git checkout -b feature/my-feature
+
+# 3. Make changes and test locally
+dotnet build
+dotnet test
+
+# 4. Commit and push
+git commit -am 'Describe your changes'
+git push origin feature/my-feature
+
+# 5. Open PR on GitHub
+```
+
+## 📖 Learning Resources
+
+### Cardano
+
+- [Official Cardano Documentation](https://docs.cardano.org)
+- [Cardano Developers](https://developers.cardano.org)
+- [Ogmios Documentation](https://ogmios.dev)
+- [Blockfrost API](https://blockfrost.io)
+
+### .NET & Blazor
+
+- [ASP.NET Core Documentation](https://docs.microsoft.com/aspnet/core)
+- [Blazor Documentation](https://docs.microsoft.com/aspnet/core/blazor)
+- [C# Guide](https://docs.microsoft.com/dotnet/csharp)
+
+### Infrastructure
+
+- [Docker Documentation](https://docs.docker.com)
+- [Docker Compose Guide](https://docs.docker.com/compose)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs)
+- [IPFS Documentation](https://docs.ipfs.io)
+
+## 🐛 Troubleshooting
+
+### Services Won't Start
+
+```bash
+# Check Docker
+docker ps
+
+# Rebuild images
+docker-compose build --no-cache
+
+# View full logs
+docker-compose logs
+```
+
+### Database Connection Errors
+
+```bash
+# Test connection
+docker-compose exec db psql -U postgres -d sampledb -c "SELECT 1"
+
+# Check environment
+docker-compose config | grep POSTGRES
+```
+
+### IPFS Not Responding
+
+```bash
+# Check IPFS status
+docker-compose exec ipfs ipfs swarm peers
+
+# Reset IPFS (WARNING: Deletes data)
+docker volume rm dotnet-codespaces_ipfs-data
+docker-compose up -d ipfs
+```
+
+See [DEVELOPER.md](./DEVELOPER.md) for more troubleshooting tips.
+
+## 📋 Compliance & Audit
+
+The platform includes:
+
+- ✅ KYC/Allowlist verification
+- ✅ Evidence bundle storage
+- ✅ Immutable audit trails
+- ✅ Regulatory reporting (NI 43-101)
+- ✅ Transaction attestation
+
+## 📄 License
+
+This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
+
+## 🙋 Support
+
+- **Documentation:** See [DEVELOPER.md](./DEVELOPER.md) and [API.md](./API.md)
+- **Issues:** Report on [GitHub Issues](https://github.com/Trustiva7777/dotnet-codespaces/issues)
+- **Discussions:** Join our [Discord](https://discord.gg/cardano-rwa)
+
+## 🎯 Roadmap
+
+### Current Release (v1.0)
+- ✅ Multi-asset support
+- ✅ Docker-based local development
+- ✅ IPFS integration
+- ✅ Cardano blockchain support
+- ✅ Monitoring & observability
+- ✅ Comprehensive documentation
+
+### Planned Features (v2.0)
+- [ ] Advanced KYC/AML engine
+- [ ] Secondary market support
+- [ ] DeFi integrations
+- [ ] Cross-chain bridges
+- [ ] Mobile app
+- [ ] Advanced analytics
+
+## 🙏 Acknowledgments
+
+Built with ❤️ on Cardano
+
+**Technology Stack:**
+- Cardano Blockchain
+- .NET & Blazor
+- TypeScript/Node.js
+- Docker & Docker Compose
+- PostgreSQL
+- IPFS
+- Prometheus & Grafana
+
+---
+
+**Last Updated:** November 2025
+**Version:** 1.0.0
+**Status:** Active Development ✅
 ## 🔗 RWA Tokenization Flow
 
 ```mermaid

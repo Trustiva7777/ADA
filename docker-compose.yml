@@ -9,9 +9,17 @@ services:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - DATABASE_CONNECTION_STRING=Host=db;Port=5432;Database=sampledb;Username=postgres;Password=postgres
+      - IPFS_API=http://ipfs:5001
+      - CARDANO_OGMIOS=http://ogmios:1337
     networks:
       - app-net
-    depends_on: []
+    depends_on:
+      db:
+        condition: service_healthy
+      ipfs:
+        condition: service_healthy
 
   frontend:
     build:
@@ -42,6 +50,147 @@ services:
       - db-data:/var/lib/postgresql/data
     networks:
       - app-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ipfs:
+    image: ipfs/kubo:latest
+    container_name: ipfs
+    ports:
+      - "4001:4001"  # IPFS TCP swarm port
+      - "4001:4001/udp"  # IPFS UDP swarm port
+      - "5001:5001"  # IPFS API
+      - "8080:8080"  # IPFS HTTP gateway
+    volumes:
+      - ipfs-data:/data/ipfs
+      - ipfs-staging:/export
+    networks:
+      - app-net
+    environment:
+      - IPFS_FD_MAX=4096
+    healthcheck:
+      test: ["CMD", "ipfs", "swarm", "peers"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  cardano-node:
+    image: inputoutput/cardano-node:8.11.0
+    container_name: cardano-node
+    user: "1000:1000"
+    environment:
+      - NETWORK=preview
+    ports:
+      - "3001:3001"
+    volumes:
+      - cardano-node-db:/data
+      - cardano-node-ipc:/ipc
+    networks:
+      - app-net
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "sh", "-c", "ls /ipc/node.socket 2>/dev/null || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '1.0'
+
+  ogmios:
+    image: cardanosolutions/ogmios:v6.7.0
+    container_name: ogmios
+    user: "1000:1000"
+    depends_on:
+      - cardano-node
+    environment:
+      - OGMIOS_NETWORK=preview
+      - OGMIOS_NODE_SOCKET=/ipc/node.socket
+    volumes:
+      - cardano-node-ipc:/ipc
+    ports:
+      - "1337:1337"
+    networks:
+      - app-net
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    command: ["--node-socket", "/ipc/node.socket", "--host", "0.0.0.0", "--port", "1337"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:1337/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - app-net
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - app-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
 
 networks:
   app-net:
@@ -49,3 +198,9 @@ networks:
 
 volumes:
   db-data:
+  ipfs-data:
+  ipfs-staging:
+  cardano-node-db:
+  cardano-node-ipc:
+  prometheus-data:
+  grafana-data:
