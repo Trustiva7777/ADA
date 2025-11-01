@@ -126,6 +126,11 @@ docker compose up --build -d
 - Backend API: [http://localhost:8080](http://localhost:8080)
 - Frontend (Blazor): [http://localhost:8081](http://localhost:8081)
 
+- Postgres: [localhost:5432](localhost:5432) (user: postgres, pass: postgres)
+- IPFS: [http://localhost:5001](http://localhost:5001) (API), [http://localhost:8080](http://localhost:8080) (Gateway)
+- Prometheus: [http://localhost:9090](http://localhost:9090)
+- Grafana: [http://localhost:3000](http://localhost:3000) (default: admin/admin)
+
 You should see the Blazor web app at [http://localhost:8081](http://localhost:8081) and the backend API at [http://localhost:8080/weatherforecast](http://localhost:8080/weatherforecast).
 
 ![Blazor App Screenshot](images/BlazorApp.png)
@@ -135,6 +140,23 @@ To stop the stack:
 ```
 docker compose down
 ```
+
+---
+
+## 🚀 Onboarding: One-Command Setup
+
+For a fast, automated local setup, use the onboarding script:
+
+```
+./setup.sh
+```
+
+This will:
+- Create a `.env` file if missing (with default secrets)
+- Build and start all services (backend, frontend, Postgres, IPFS, Cardano node, monitoring)
+- Print service URLs and credentials
+
+See the script for details and customize as needed.
 
 **Troubleshooting:**
 
@@ -477,7 +499,32 @@ graph TB
 
 <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
 
-### 📚 Documentation Suite
+### � API Documentation (OpenAPI)
+
+The backend API is documented using OpenAPI. See [`openapi.yaml`](./openapi.yaml) for the full specification.
+
+**Sample endpoint:**
+
+- `GET /weatherforecast` — Returns a list of weather forecasts (see OpenAPI spec for schema).
+
+You can visualize the spec using [Swagger Editor](https://editor.swagger.io/) or similar tools.
+
+---
+
+### 🔄 Sequence Diagram: Weather Forecast API
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Backend
+    User->>Frontend: Request weather data
+    Frontend->>Backend: GET /weatherforecast
+    Backend-->>Frontend: 200 OK (JSON array)
+    Frontend-->>User: Render weather table
+```
+
+### �📚 Documentation Suite
 
 | Component | Documentation | Location |
 |-----------|---------------|----------|

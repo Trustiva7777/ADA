@@ -29,24 +29,23 @@ services:
     depends_on:
       - backend
 
-  # Example: Add Postgres if needed
-  # db:
-  #   image: postgres:15
-  #   container_name: db
-  #   environment:
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - POSTGRES_DB=sampledb
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - db-data:/var/lib/postgresql/data
-  #   networks:
-  #     - app-net
+  db:
+    image: postgres:15
+    container_name: db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=sampledb
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - app-net
 
 networks:
   app-net:
     driver: bridge
 
-#volumes:
-#  db-data:
+volumes:
+  db-data:
