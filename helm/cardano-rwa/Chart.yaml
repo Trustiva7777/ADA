@@ -1,0 +1,27 @@
+apiVersion: v2
+name: cardano-rwa
+description: Cardano RWA Backend Helm Chart - Enterprise Deployment
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+maintainers:
+  - name: Trustiva Engineering
+    email: engineering@trustiva.io
+
+keywords:
+  - cardano
+  - blockchain
+  - rwa
+  - enterprise
+  - kubernetes
+
+home: https://github.com/Trustiva7777/ADA
+sources:
+  - https://github.com/Trustiva7777/ADA
+  
+dependencies: []
+
+annotations:
+  category: Backend
+  licenses: Apache-2.0

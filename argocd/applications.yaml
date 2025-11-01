@@ -1,0 +1,70 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cardano-rwa
+  namespace: argocd
+spec:
+  project: default
+  
+  source:
+    repoURL: https://github.com/Trustiva7777/ADA
+    targetRevision: main
+    path: helm/cardano-rwa
+    plugin:
+      name: kustomize
+    syncPolicy:
+      syncOptions:
+        - CreateNamespace=true
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cardano-rwa
+  
+  # Automatic sync configuration
+  syncPolicy:
+    automated:
+      prune: true      # Delete resources if removed from Git
+      selfHeal: true   # Reconcile if cluster state diverges
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  
+  # Health assessment rules
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas  # Allow manual scaling
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cardano-rwa-db
+  namespace: argocd
+spec:
+  project: default
+  
+  source:
+    repoURL: https://github.com/Trustiva7777/ADA
+    targetRevision: main
+    path: helm/cardano-rwa-db
+    plugin:
+      name: kustomize
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cardano-rwa
+  
+  syncPolicy:
+    automated:
+      prune: false     # Don't auto-delete database resources
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
